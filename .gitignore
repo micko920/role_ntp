@@ -2,3 +2,4 @@ pytestdebug.log
 *.retry
 */__pycache__
 *.pyc
+.svn
