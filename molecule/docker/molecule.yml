@@ -12,7 +12,7 @@ lint:
   name: yamllint
 platforms:
   - name: homelab-local
-    image: homelab:local
+    image: ${MOLECULE_DOCKER_IMAGE:-"homelab:local"}
     pre_build_image: true
 provisioner:
   name: ansible

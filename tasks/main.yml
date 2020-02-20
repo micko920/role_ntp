@@ -1,4 +1,6 @@
 ---
+- include_tasks: is_systemd.yml
+
 - name: Include OS-specific variables.
   include_vars: "{{ ansible_os_family }}.yml"
 
@@ -25,19 +27,23 @@
 
 - name: Ensure NTP is running and enabled as configured.
   become: yes
-  service:
+  systemd:
     name: "{{ ntp_daemon }}"
     state: started
     enabled: true
-  when: ntp_enabled | bool
+  when:
+    - ntp_enabled | bool
+    - systemd_pid_1 is defined and systemd_pid_1
 
 - name: Ensure NTP is stopped and disabled as configured.
   become: yes
-  service:
+  systemd:
     name: "{{ ntp_daemon }}"
     state: stopped
     enabled: false
-  when: not (ntp_enabled | bool)
+  when:
+    - not (ntp_enabled | bool)
+    - systemd_pid_1 is defined and systemd_pid_1
 
 - name: Generate ntp.conf file
   become: yes
