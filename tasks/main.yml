@@ -25,6 +25,27 @@
   timezone:
     name: "{{ ntp_timezone }}"
 
+- name: create ntp service instance
+  import_role:
+    name: micko920.role_createservice
+  vars:
+    service_list:
+      - name: "ntp"
+        description: "Network Time Service"
+        documentation: "man:ntpd(8)"
+        start_command: "/usr/lib/ntp/ntp-systemd-wrapper"
+        type: "forking"
+        after: "network.target network-online.target"
+        requires: "network-online.target"
+        extra_values:
+          KillMode: "mixed"
+          KillSignal: "SIGQUIT"
+          TimeoutStopSec: "5s"
+          LimitNOFILE: "1048576"
+          LimitNPROC: "512"
+  when: systemd_pid_1 is defined and systemd_pid_1
+
+
 - name: Ensure NTP is running and enabled as configured.
   become: yes
   systemd:
