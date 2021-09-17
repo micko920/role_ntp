@@ -25,6 +25,12 @@
   timezone:
     name: "{{ ntp_timezone }}"
 
+
+- name: Remove unit service file
+  file:
+    path: /etc/systemd/system/multi-user.target.wants/ntp.service
+    state: absent
+
 - name: create ntp service instance
   import_role:
     name: micko920.role_createservice
