@@ -17,19 +17,11 @@
     state: present
   when: ansible_system == "Linux"
 
-- include_tasks: clock-rhel-6.yml
-  when: ansible_os_family == 'RedHat' and ansible_distribution_version.split('.')[0] == '6'
-
 - name: Set timezone
   become: yes
   timezone:
     name: "{{ ntp_timezone }}"
 
-
-- name: Remove unit service file
-  file:
-    path: /etc/systemd/system/multi-user.target.wants/ntp.service
-    state: absent
 
 - name: create ntp service instance
   import_role:
