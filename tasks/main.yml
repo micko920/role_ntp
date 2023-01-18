@@ -4,6 +4,13 @@
 - name: Include OS-specific variables.
   include_vars: "{{ ansible_os_family }}.yml"
 
+- name: Ensure Conflicting NTP-related packages are removed.
+  become: yes
+  apt:
+    name: systemd-timesyncd
+    state: absent
+
+
 - name: Ensure NTP-related packages are installed.
   become: yes
   apt:
@@ -32,17 +39,31 @@
         description: "Network Time Service"
         documentation: "man:ntpd(8)"
         start_command: "/usr/lib/ntp/ntp-systemd-wrapper"
-        type: "forking"
+        type: "simple"
         after: "network.target network-online.target"
         requires: "network-online.target"
         extra_values:
-          KillMode: "mixed"
+          KillMode: "process"
           KillSignal: "SIGQUIT"
           TimeoutStopSec: "5s"
           LimitNOFILE: "1048576"
           LimitNPROC: "512"
   when: systemd_pid_1 is defined and systemd_pid_1
 
+- name: Let Systemd handle PID file
+  lineinfile:
+    dest: /usr/lib/ntp/ntp-systemd-wrapper
+    regexp: "exec \\$DAEMON .*"
+    line: "exec $DAEMON $NTPD_OPTS"
+  when: systemd_pid_1 is defined and systemd_pid_1
+
+
+- name: Correct Daemon mode
+  lineinfile:
+    dest: /etc/default/ntp
+    regexp: "NTPD_OPTS=.*"
+    line: "NTPD_OPTS='-g -n'"
+  when: systemd_pid_1 is defined and systemd_pid_1
 
 - name: Ensure NTP is running and enabled as configured.
   become: yes
